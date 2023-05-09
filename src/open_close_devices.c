@@ -17,6 +17,6 @@ int open_device(void) {
         perror("Opening Video Device");
         return -1;
     }
-    return 0;
+    return fd;
 }
 

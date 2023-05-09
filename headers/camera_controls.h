@@ -13,7 +13,7 @@
 #include <unistd.h>
 
 // Important Structs` 
-
+extern uint8_t * buffer_ptr;
 
 // Functions
 int init_mmap(int fd);

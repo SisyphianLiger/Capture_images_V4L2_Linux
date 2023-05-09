@@ -10,6 +10,7 @@ int check_camera_capabilities(int fd){
 
     struct v4l2_capability caps = {};
     if ( -1 == xioctl(fd, VIDIOC_QUERYCAP, &caps)){
+	printf("Errno: %d/n", errno);
         perror("Querying Capabilities");
         return 1;
     }
