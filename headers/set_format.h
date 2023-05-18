@@ -11,7 +11,7 @@
 // Important Structs` 
 
 // Functions
-int set_format(int fd, int width, int height);
+int set_format(int fd, unsigned short width, unsigned short height);
 // Static function for query_capture
 
 #endif  

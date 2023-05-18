@@ -21,19 +21,24 @@ int main() {
     int nbufs;
     
     // First let's check that it's possible to find the camera
-    query_capabilities(fd);
+    if( 0 != query_capabilities(fd))
+        exit(EXIT_FAILURE);
 
     // Then we set format, macros made for custom pictures
     set_format(fd, STANDARD_WIDTH, STANDARD_HEIGHT);
 
     // Here we are requesting the buffer based on NBUF
+    if( EINVAL == request_buffer(fd, NBUF))
+        exit(EXIT_FAILURE);
+
     nbufs = request_buffer(fd, NBUF); 
 
     // Here we check that we have set up enough buffer slots otherwise
     // we get an angry driver and need to increase our size
+    // Possible Refactor given function above
     if(nbufs > NBUF) {
         fprintf(stderr, "Minimum NBUF size MUST be at least %i\n", nbufs);
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     // So we allocate the buffer que!
@@ -41,10 +46,12 @@ int main() {
         // We Assume here that all buffers are of equal sizes
         size = query_buffer(fd, 0, &buffer[0]);
         // Now we allocate it here
-        enqueue_buffer(fd, i);
+        if (EINVAL == enqueue_buffer(fd, i))
+            exit(EXIT_FAILURE);
     }
     // All Clear lets start the stream
-    start_stream(fd);
+    if( EINVAL == start_stream(fd) )
+        exit(EXIT_FAILURE);
     
     fd_set fds;
     FD_ZERO(&fds);
@@ -62,6 +69,8 @@ int main() {
         exit(1);
     }
 
+    if( EINVAL == dequeue_buffer(fd))
+        exit(EXIT_FAILURE);
     // Now we make sure to dequeue_buffer the buffer
     index = dequeue_buffer(fd);
 
@@ -73,11 +82,13 @@ int main() {
     write(output_file, buffer[index], size);
 
     // We end the stream device because we have dequeue_buffer
-    stop_stream(fd);
+    if( EINVAL == stop_stream(fd) )
+        exit(EXIT_FAILURE);
+
     // Make sure that the output_file is closed
     close(output_file);
     // close video device
     close(fd);
-
+    
     return 0;
 }

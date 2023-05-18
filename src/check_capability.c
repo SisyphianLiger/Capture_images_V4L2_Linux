@@ -2,6 +2,7 @@
 #include <sys/ioctl.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
 
 
 /*
@@ -10,24 +11,82 @@
  * if verifyied true, it will be used as the capture device. 
  */
 
-void query_capabilities(int fd) {
+
+/*@
+  lemma ioctl_res_success_or_failure:
+    \forall int io_res; io_res == 0 || io_res != -1;
+*/
+
+/*@
+    requires fd > INT_MIN && fd < INT_MAX;
     
+    behavior Query_Successful:
+    ensures \result == 0;
+
+    behavior Not_Capable_Query:
+    ensures \result == ENODEV;
+
+    behavior No_Video_Detected:
+    ensures \result == ENOSYS;
+
+    behavior No_Read_Write_IO:
+    ensures \result == EIO;
+
+    behavior No_Streaming_Supported:
+    ensures \result == ENOSTR;
+
+    disjoint behaviors;
+    complete behaviors;
+*/
+
+int query_capabilities(int fd) {
     struct v4l2_capability capability;
-
-    if( -1 == ioctl(fd, VIDIOC_QUERYCAP, &capability)){
-        perror("Query Capabilities");
-        exit(EXIT_FAILURE);
-    }
-
-    if (!(capability.capabilities & V4L2_CAP_VIDEO_CAPTURE)){
-        fprintf(stderr, "Device is no video capture device \\n");
-        exit(EXIT_FAILURE);
-    }
-
-    if (!(capability.capabilities & V4L2_CAP_READWRITE))
-        fprintf(stderr, "Device does not support read i/o \\n");
     
-    if (!(capability.capabilities & V4L2_CAP_STREAMING))
-        fprintf(stderr, "Device does not support streaming \\n");
+    int io_res = ioctl(fd, VIDIOC_QUERYCAP, &capability);
+    //@ assert io_res == 0 || io_res == -1;
+    if( -1 == io_res){
+        //@ assert io_res == -1;
+        perror("No Device to Query capabilities found, please check connection");
+        //@ assert io_res == -1; 
+        fprintf(stderr, "Error Number: %d\n", ENODEV); 
+        //@ assert io_res == -1;
+        return ENODEV;
+    }
+    //@ assert io_res == 0;
+    int video_capture = capability.capabilities & V4L2_CAP_VIDEO_CAPTURE;
+    //@ assert io_res == 0 && video_capture == 1 || video_capture != 1;
+    if ( ! video_capture ){
+        //@ assert io_res == 0 && video_capture != 1;
+        perror("Device has no video capture device \\n");
+        //@ assert io_res == 0 && video_capture != 1; 
+        fprintf(stderr, "Error Number: %d\n", ENOSYS);
+        //@ assert io_res == 0 && video_capture != 1;
+        return ENOSYS;
+    } 
+    //@ assert io_res == 0 && video_capture == 1;  
+    int video_read_write = capability.capabilities & V4L2_CAP_READWRITE;
+    //@ assert io_res == 0 && video_capture == 1 && video_read_write == 16777216 || video_read_write != 16777216;
+    if ( ! video_read_write ){
+    //@ assert io_res == 0 && video_capture == 1 && video_read_write != 16777216;
+        perror("Device does not support read/write i/o \\n");
+        //@ assert io_res == 0 && video_capture == 1 && video_read_write != 16777216;
+        fprintf(stderr, "Error Number: %d\n", EIO);
+        //@ assert io_res == 0 && video_capture == 1 && video_read_write != 16777216;
+        return EIO;
+    } 
+    //@ assert io_res == 0 && video_capture == 1 && video_read_write == 16777216;
+    int video_streaming = capability.capabilities & V4L2_CAP_STREAMING;
+    //@ assert io_res == 0 && video_capture == 1 && video_read_write == 16777216 && video_streaming == 67108864 || video_streaming != 67108864;
+    
+    if ( ! video_streaming ){
+        //@ assert io_res == 0 && video_capture == 1 && video_read_write == 16777216 && video_streaming != 67108864;
+        perror("Device does not support streaming \\n");
+        //@ assert io_res == 0 && video_capture == 1 && video_read_write == 16777216 && video_streaming != 67108864;
+        fprintf(stderr, "Error Number: %d\n", ENOSTR);
+        //@ assert io_res == 0 && video_capture == 1 && video_read_write == 16777216 && video_streaming != 67108864;
+        return ENOSTR;
+    }
 
+    //@ assert io_res == 0 && video_capture == 1 && video_read_write == 16777216 && video_streaming == 67108864;
+    return 0;
 }
