@@ -15,9 +15,9 @@
     \forall int res; res == 0 || res != -1;
 */
 /*@
-    requires fd > INT_MIN && fd < INT_MAX;
-    requires width > SHRT_MIN && width < SHRT_MAX;
-    requires height > SHRT_MIN && height < SHRT_MAX;
+    requires fd >= INT_MIN && fd <= INT_MAX;
+    requires width >= SHRT_MIN && width <= SHRT_MAX;
+    requires height >= SHRT_MIN && height <= SHRT_MAX;
     
     behavior success:
         ensures \result == 0;

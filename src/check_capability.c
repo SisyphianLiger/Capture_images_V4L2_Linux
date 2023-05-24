@@ -18,7 +18,7 @@
 */
 
 /*@
-    requires fd > INT_MIN && fd < INT_MAX;
+    requires fd >= INT_MIN && fd <= INT_MAX;
     
     behavior Query_Successful:
     ensures \result == 0;
