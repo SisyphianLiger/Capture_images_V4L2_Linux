@@ -12,7 +12,7 @@
 
 /*@
   lemma res_success_or_failure:
-    \forall int res; res == 0 || res != -1;
+    \forall int res; res == 0 || res == -1;
 */
 /*@
     requires fd >= INT_MIN && fd <= INT_MAX;

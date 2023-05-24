@@ -14,7 +14,7 @@
 
 /*@
   lemma ioctl_res_success_or_failure:
-    \forall int io_res; io_res == 0 || io_res != -1;
+    \forall int io_res; io_res == 0 || io_res == -1;
 */
 
 /*@
