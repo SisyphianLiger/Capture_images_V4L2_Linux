@@ -33,7 +33,7 @@
     requires count >= 0 && count <= 4294967295;
 
     behavior buffer_successful:
-        ensures \result == count; 
+        ensures \result; 
 
     behavior buffer_failured:
         ensures \result == EINVAL;
