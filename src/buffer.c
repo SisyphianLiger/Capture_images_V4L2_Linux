@@ -97,28 +97,29 @@ int request_buffer(int fd, unsigned int count){
 */
 int query_buffer(int fd, int index, unsigned char **buffer){
     struct v4l2_buffer buffer_alloc = {0};
-    
     buffer_alloc.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     //@ assert buffer_alloc.type == V4L2_BUF_TYPE_VIDEO_CAPTURE;
     buffer_alloc.memory = V4L2_MEMORY_MMAP;
     //@ assert buffer_alloc.type == V4L2_BUF_TYPE_VIDEO_CAPTURE && buffer_alloc.memory == V4L2_MEMORY_MMAP;
     buffer_alloc.index = index;
-    //@ assert buffer_alloc.type == V4L2_BUF_TYPE_VIDEO_CAPTURE && buffer_alloc.memory == V4L2_MEMORY_MMAP && buffer_alloc.index == index;
+    /*@ assert buffer_alloc.type == V4L2_BUF_TYPE_VIDEO_CAPTURE && 
+               buffer_alloc.memory == V4L2_MEMORY_MMAP && 
+               buffer_alloc.index == index;
+    */ 
+    int io_res = ioctl(fd, VIDIOC_QUERYBUF, &buffer_alloc); 
+    //@ assert io_res == 0 || io_res == -1 && buffer_alloc.type == V4L2_BUF_TYPE_VIDEO_CAPTURE && buffer_alloc.memory == V4L2_MEMORY_MMAP && buffer_alloc.index == index;
     
-    int res = ioctl(fd, VIDIOC_QUERYBUF, &buffer_alloc); 
-    //@ assert res == 0 || res == -1 && buffer_alloc.type == V4L2_BUF_TYPE_VIDEO_CAPTURE && buffer_alloc.memory == V4L2_MEMORY_MMAP && buffer_alloc.index == index;
-    
-    if ( res == -1 ){
-        //@ assert res == -1 && buffer_alloc.type == V4L2_BUF_TYPE_VIDEO_CAPTURE && buffer_alloc.memory == V4L2_MEMORY_MMAP && buffer_alloc.index == index;
+    if ( io_res == -1 ){
+        //@ assert io_res == -1 && buffer_alloc.type == V4L2_BUF_TYPE_VIDEO_CAPTURE && buffer_alloc.memory == V4L2_MEMORY_MMAP && buffer_alloc.index == index;
         perror("Could not Query the Buffer, Please check if query_capabilities runs successfully ");
-        //@ assert res == -1 && buffer_alloc.type == V4L2_BUF_TYPE_VIDEO_CAPTURE && buffer_alloc.memory == V4L2_MEMORY_MMAP && buffer_alloc.index == index;
+        //@ assert io_res == -1 && buffer_alloc.type == V4L2_BUF_TYPE_VIDEO_CAPTURE && buffer_alloc.memory == V4L2_MEMORY_MMAP && buffer_alloc.index == index;
         fprintf(stderr, "Error Number: %d\n", EINVAL);
-        //@ assert res == -1 && buffer_alloc.type == V4L2_BUF_TYPE_VIDEO_CAPTURE && buffer_alloc.memory == V4L2_MEMORY_MMAP && buffer_alloc.index == index;
+        //@ assert io_res == -1 && buffer_alloc.type == V4L2_BUF_TYPE_VIDEO_CAPTURE && buffer_alloc.memory == V4L2_MEMORY_MMAP && buffer_alloc.index == index;
         return EINVAL;
     }
-    //@ assert res == 0  && buffer_alloc.type == V4L2_BUF_TYPE_VIDEO_CAPTURE && buffer_alloc.memory == V4L2_MEMORY_MMAP && buffer_alloc.index == index;
+    //@ assert io_res == 0  && buffer_alloc.type == V4L2_BUF_TYPE_VIDEO_CAPTURE && buffer_alloc.memory == V4L2_MEMORY_MMAP && buffer_alloc.index == index;
     *buffer = (u_int8_t*) mmap (NULL, buffer_alloc.length, PROT_READ | PROT_WRITE, MAP_SHARED, fd, buffer_alloc.m.offset); 
-    //@ assert \valid(buffer) && res == 0  && buffer_alloc.type == V4L2_BUF_TYPE_VIDEO_CAPTURE && buffer_alloc.memory == V4L2_MEMORY_MMAP && buffer_alloc.index == index;
+    //@ assert \valid(buffer) && io_res == 0  && buffer_alloc.type == V4L2_BUF_TYPE_VIDEO_CAPTURE && buffer_alloc.memory == V4L2_MEMORY_MMAP && buffer_alloc.index == index;
     return buffer_alloc.length;
 }
 
