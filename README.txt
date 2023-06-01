@@ -1,3 +1,19 @@
+FOR REVIEWERS:
+
+This github repository is a cloned respository of my work for DISCOSAT.
+All proven functions are found in the source folders in the following 
+sections: src/buffer.c, src/check_capability.c, src/set_format.c
+
+The following code location has been referenced in the Thesis:
+
+<Function_Name>                 <Location>
+request_buffer                  src/buffer.c
+query_capabilities              src/check_capability.c
+
+
+
+FOR REPOSITORY USERS ONLY:
+
 These are instructions on how to get this working:
 
 The following C code has only been used on a Raspberry Pi 3B.
